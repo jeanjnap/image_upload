@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Photo;
 use Illuminate\Http\Request;
+use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\Resources\PhotoResource;
 
 class PhotoController extends Controller
 {
@@ -15,7 +17,8 @@ class PhotoController extends Controller
      */
     public function index()
     {
-        return Photo::all();
+        //return Photo::all();
+        return PhotoResource::collection(Photo::all());
     }
 
     /**
@@ -36,7 +39,47 @@ class PhotoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required'
+        ]);
+
+        $photos = [];
+
+        $photosLength = count($request->photo);
+
+        for ($i = 0; $i < $photosLength; $i++) {
+            $base64_str = $request->photo[$i];
+
+            $image = base64_decode($base64_str);
+            $name = time() . "_" . md5(uniqid(rand(), true)) . '.jpg';
+            $path = public_path() . "\\pictures\\" . $name;
+
+            $path = str_replace("public", "storage\app\public", $path);
+
+            $fp = fopen($path, 'w');
+            if (fwrite($fp, $image)) {
+
+                //geting original size
+                //list($width, $height) = getimagesize($path);
+
+                // open the image file
+                $img = Image::make($path);
+                // now you are able to resize the instance
+                $img->resize(400, 400);
+                // finally we save the image as a new file
+                $img->save($path);
+
+                $newPhoto = Photo::create([
+                    'file_name' => $name
+                ]);
+
+                array_push($photos, new PhotoResource($newPhoto));
+            }
+            fclose($fp);
+        }
+        return response()->json([
+            'status' => 'success', 'data' => $photos,
+        ], 201);
     }
 
     /**
