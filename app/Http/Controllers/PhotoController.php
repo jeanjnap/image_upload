@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Photo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\Resources\PhotoResource;
@@ -88,9 +89,10 @@ class PhotoController extends Controller
      * @param  \App\Models\Photo  $photo
      * @return \Illuminate\Http\Response
      */
-    public function show(Photo $photo)
+    public function show(int $id)
     {
-        //
+        $photo_search = DB::table('photos')->select(['*'])->where('id', $id)->first();
+        return new PhotoResource($photo_search);
     }
 
     /**

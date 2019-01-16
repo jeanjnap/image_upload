@@ -15,3 +15,4 @@ use Illuminate\Http\Request;
 
 Route::post('photos/400x400', 'PhotoController@store');
 Route::get('photos', 'PhotoController@index');
+Route::get('photos/{id}', 'PhotoController@show');
