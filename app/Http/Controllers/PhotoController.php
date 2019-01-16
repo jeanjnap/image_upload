@@ -40,8 +40,9 @@ class PhotoController extends Controller
      */
     public function store(Request $request)
     {
+
         $validator = Validator::make($request->all(), [
-            'photo' => 'required'
+            'photo' => 'required',
         ]);
 
         $photos = [];
@@ -53,9 +54,9 @@ class PhotoController extends Controller
 
             $image = base64_decode($base64_str);
             $name = time() . "_" . md5(uniqid(rand(), true)) . '.jpg';
-            $path = public_path() . "\\pictures\\" . $name;
+            $path = '../storage/app/public/pictures/' . $name;
 
-            $path = str_replace("public", "storage\app\public", $path);
+           // $path = str_replace("public", "storage\app\public", $path);
 
             $fp = fopen($path, 'w');
             if (fwrite($fp, $image)) {
@@ -71,7 +72,7 @@ class PhotoController extends Controller
                 $img->save($path);
 
                 $newPhoto = Photo::create([
-                    'file_name' => $name
+                    'file_name' => $name,
                 ]);
 
                 array_push($photos, new PhotoResource($newPhoto));
@@ -81,6 +82,7 @@ class PhotoController extends Controller
         return response()->json([
             'status' => 'success', 'data' => $photos,
         ], 201);
+
     }
 
     /**
